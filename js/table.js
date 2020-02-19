@@ -24,6 +24,9 @@ function table() {
     // See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table
 
     // YOUR CODE HERE
+    table.append('thead').append('tr')
+        .selectAll('th')
+        .data(tableHeaders).enter().append("th").text(d => d); 
 
     // Then, you add a row for each row of the data.  Within each row, you
     // add a cell for each piece of data in the row.
@@ -32,7 +35,17 @@ function table() {
     // two different calls to enter() and data(), or with two different loops.
 
     // YOUR CODE HERE
-
+    let rows = table.append("tbody")
+        .selectAll("tr")
+        .data(data)
+        .enter()
+        .append("tr");
+    let cells = rows.selectAll("td")
+        .data(d => d3.values(d))
+        .enter()
+        .append("td")
+        .text(d => d);     
+    console.log("worked")       
 
     // Then, add code to allow for brushing.  Note, this is handled differently
     // than the line chart and scatter plot because we are not using an SVG.
@@ -46,6 +59,26 @@ function table() {
     // and when the mouse is down, keep track of any rows that have been mouseover'd
 
     // YOUR CODE HERE
+    //mouse over - -assign table rows to selected class
+    //mouse leaves -- deselect all of table elements
+
+    d3.selectAll("tr")
+    .on("mouseover", (d, i, elements) => {
+      d3.select(elements[i]).classed("selected", true)
+    })
+    .on("mouseout", (d, i, elements) => {
+      d3.select(elements[i]).classed("selected", false)
+    });
+
+    // rows.on("mouseover", function(d){
+		// 	d3.select(this)
+		// 		.style("background-color", "orange");
+		// })
+		// .on("mouseout", function(d){
+		// 	d3.select(this)
+		// 		.style("background-color","transparent");
+		// });
+
 
     return chart;
   }
