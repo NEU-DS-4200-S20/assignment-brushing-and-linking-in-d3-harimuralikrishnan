@@ -26,7 +26,7 @@ function table() {
     // YOUR CODE HERE
     table.append('thead').append('tr')
         .selectAll('th')
-        .data(tableHeaders).enter().append("th").text(d => d); 
+        .data(tableHeaders).enter().append("th").text(d => d);  //append the headers to the displayed table first
 
     // Then, you add a row for each row of the data.  Within each row, you
     // add a cell for each piece of data in the row.
@@ -35,17 +35,16 @@ function table() {
     // two different calls to enter() and data(), or with two different loops.
 
     // YOUR CODE HERE
-    let rows = table.append("tbody")
+    let rows = table.append("tbody") //first i make the rows
         .selectAll("tr")
         .data(data)
         .enter()
         .append("tr");
-    let cells = rows.selectAll("td")
+    let cells = rows.selectAll("td") //then i make the cells
         .data(d => d3.values(d))
         .enter()
         .append("td")
         .text(d => d);     
-    console.log("worked")       
 
     // Then, add code to allow for brushing.  Note, this is handled differently
     // than the line chart and scatter plot because we are not using an SVG.
@@ -59,27 +58,32 @@ function table() {
     // and when the mouse is down, keep track of any rows that have been mouseover'd
 
     // YOUR CODE HERE
-    //mouse over - -assign table rows to selected class
-    //mouse leaves -- deselect all of table elements
+    
 
+    let mouseDown; // variable indicating whether mouse is being pressed down 
     d3.selectAll("tr")
     .on("mouseover", (d, i, elements) => {
-      d3.select(elements[i]).classed("selected", true)
+      d3.select(elements[i]).classed("mouseover", true) // when hover, make row gray
+      if (mouseDown) { // if mouse is down AND hovering
+        d3.select(elements[i]).classed("selected", true) //want to select, so make that row dark pink-gray
+        let dispatchString = Object.getOwnPropertyNames(dispatcher._)[0]; //update the dispatch event with this latest selection
+        dispatcher.call(dispatchString, this, table.selectAll(".selected").data());
+      }
+    })
+    .on("mouseup", (d, i, elements) => {
+      mouseDown = false //when mouse is released, no longer pressing down
+    })
+    .on("mousedown", (d, i, elements) => {
+      d3.selectAll(".selected").classed("selected", false) // when you press a mouse down, you want to make sure previously selected rows de-select
+      mouseDown = true
+      d3.select(elements[i]).classed("selected", true) // want to freshly select the row being pressed on 
+      let dispatchString = Object.getOwnPropertyNames(dispatcher._)[0]; //update the dispatch event with this latest selection
+      dispatcher.call(dispatchString, this, table.selectAll(".selected").data());
     })
     .on("mouseout", (d, i, elements) => {
-      d3.select(elements[i]).classed("selected", false)
+      d3.select(elements[i]).classed("mouseover", false) // stop hovering over a cell, take gray color away from it
     });
-
-    // rows.on("mouseover", function(d){
-		// 	d3.select(this)
-		// 		.style("background-color", "orange");
-		// })
-		// .on("mouseout", function(d){
-		// 	d3.select(this)
-		// 		.style("background-color","transparent");
-		// });
-
-
+    
     return chart;
   }
 
@@ -99,6 +103,8 @@ function table() {
     d3.selectAll('tr').classed("selected", d => {
       return selectedData.includes(d)
     });
+
+    //dispatch broadcast with this object and also reference to the selectedData
   };
 
   return chart;
